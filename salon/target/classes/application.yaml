@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    username: salon
+    password: salon
+    url: jdbc:mysql://localhost:3306/salon
+    
+  jpa:
+    hibernate:
+      ddl_auto: create
+    show-sql: true
+    defer-datasource-initialization: true
+    
+  sql:
+    init:
+      mode: never
+   
