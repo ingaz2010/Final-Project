@@ -277,6 +277,7 @@ public class SalonService {
 		Long employeeId = employeeData.getEmployeeId();
 		Employee employee = findEmployeeById(employeeId);
 		service.getEmployees().add(employee);
+		employee.getServices().add(service);
 		
 		salon.entity.Service dbService = serviceDao.save(service);
 		return new ServiceData(dbService);
