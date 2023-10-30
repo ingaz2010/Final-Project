@@ -44,6 +44,15 @@ public class EmployeeData {
 		}
 	}
 	
+	//constructor that takes variables
+	public EmployeeData (Long employeeId, String firstName, String lastName, String phone, String position) {
+		this.employeeId = employeeId;
+		this.employeeFirstName = firstName;
+		this.employeeLastName = lastName;
+		this.employeePhone = phone;
+		this.employeePosition = position;
+	}
+	
 	
 	@Data
 	@NoArgsConstructor
