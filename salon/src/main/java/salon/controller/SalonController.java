@@ -61,7 +61,7 @@ public class SalonController {
 	public Map<String, String> deleteEmployeeById(@PathVariable Long employeeId){
 		log.info("Deleting Employee with ID={}", employeeId);
 		salonService.deleteEmployeeById(employeeId);
-		return Map.of("Message", "Deetion of employee with ID=" + employeeId + "was successful");
+		return Map.of("Message", "Deletion of employee with ID=" + employeeId + " was successful");
 	}
 	
 	@DeleteMapping("/employee")
@@ -157,8 +157,10 @@ public class SalonController {
 	}
 	
 	@DeleteMapping("/{customerId}/service/{serviceId}")
-	public void deleteServiceById(@PathVariable Long customerId, @PathVariable Long serviceId) {
+	public Map<String, String> deleteServiceById(@PathVariable Long customerId, @PathVariable Long serviceId) {
 		log.info("You are trying to delete service with ID={}", serviceId);
-		throw new UnsupportedOperationException("You are not allowed to delete any services");
+		//throw new UnsupportedOperationException("You are not allowed to delete any services");
+		salonService.deleteServiceById(customerId, serviceId);
+		return Map.of("message", "Deletion of service with ID=" + serviceId + " was successful");
 	}
 	}

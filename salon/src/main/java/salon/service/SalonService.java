@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.PreRemove;
 import salon.controller.model.CustomerData;
 import salon.controller.model.EmployeeData;
 import salon.controller.model.ServiceData;
@@ -168,12 +169,27 @@ public class SalonService {
 		return new CustomerData(customer);
 	}
 
-	//delete customer by id
+	//delete customer by id, also removes services that were performed for the customer
 	@Transactional(readOnly = false)
 	public void deleteCustomerById(Long customerId, Long employeeId) {
 		Customer customer = findCustomerById(customerId, employeeId); //find customer
+		removeCustomerAssociations(customerId, employeeId);
+		
 		customerDao.delete(customer); // delete
 	}
+	
+	//removes customer's connections, such as employee and services
+	@PreRemove
+	public void removeCustomerAssociations(Long customerId, Long employeeId) {
+		Customer customer = findCustomerById(customerId, employeeId);
+		customer.setEmployee(null);
+		for(salon.entity.Service service : customer.getServices()) {
+			Long serviceId = service.getServiceId();
+			deleteServiceById(customerId, serviceId);
+			
+		}
+	}
+	
 
 	
 	//SERVICE
@@ -223,20 +239,20 @@ public class SalonService {
 	}
 	
 	// find service by id; throws exception
-	public salon.entity.Service findServiceById(Long serviceId, Long customerId) {
+	@Transactional(readOnly = true)
+	public salon.entity.Service findServiceById(Long customerId, Long serviceId) {
 		salon.entity.Service service = serviceDao.findById(serviceId).orElseThrow(
 				() -> new NoSuchElementException("Service with ID=" + serviceId + " was not found"));
 		
 		if(service.getCustomer().getCustomerId() == customerId) {
 			return service;
 		} else {
-			throw new IllegalArgumentException("Customer with ID=" + customerId + "does not exists and service could not be associated with it");
+			throw new IllegalArgumentException("Customer with ID=" + customerId + "does not exists and service with ID=" + serviceId + " could not be associated with it");
 			
 		}
 	}
 
 	// Get the List of all services with all data
-	@Transactional(readOnly = true)
 	public List<ServiceData> retrieveAllServicesWithData() {
 		List<salon.entity.Service> services = serviceDao.findAll();
 		List<ServiceData> servicesData = new LinkedList<>();
@@ -270,7 +286,7 @@ public class SalonService {
 	// get service by id
 	@Transactional(readOnly = true)
 	public ServiceData retrieveServiceById(Long customerId, Long serviceId) {
-		salon.entity.Service service = findServiceById(serviceId, customerId);
+		salon.entity.Service service = findServiceById(customerId, serviceId);
 		return new ServiceData(service);
 	}
 
@@ -304,5 +320,23 @@ public class SalonService {
 		
 		salon.entity.Service dbService = serviceDao.save(service);
 		return new ServiceData(dbService);
+	}
+
+	//delete service by id
+	@Transactional(readOnly = false)
+	public void deleteServiceById(Long customerId, Long serviceId) {
+		salon.entity.Service service = findServiceById(customerId, serviceId);
+		removeServiceAssosiations(customerId, serviceId);
+		serviceDao.delete(service);
+	}
+	
+	//remove all connections from service, such as customer and employee
+	@PreRemove
+	public void removeServiceAssosiations(Long customerId, Long serviceId) {
+		salon.entity.Service service = findServiceById(customerId, serviceId);
+		service.setCustomer(null);
+		for(Employee employee : service.getEmployees()) {
+			employee.getServices().remove(service);
+		}
 	}
 }

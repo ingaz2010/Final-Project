@@ -29,7 +29,7 @@ public class Service {
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "customer_id")
+	@JoinColumn(name = "customer_id", nullable = true)
 	private Customer customer;
 	
 	@EqualsAndHashCode.Exclude
